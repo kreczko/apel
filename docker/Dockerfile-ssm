@@ -1,0 +1,4 @@
+FROM hepdocker/apel-base
+
+COPY client.cfg /etc/apel/client.cfg
+

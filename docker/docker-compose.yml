@@ -1,0 +1,45 @@
+version: '2'
+services:
+  apel:
+    build:
+      context: ../../
+      dockerfile: apel/docker/Dockerfile-base
+    image: hepdocker/apel-base
+  apel-htcondor:
+    build:
+      context: .
+      dockerfile: Dockerfile-htcondor
+    image: hepdocker/apel-htcondor
+    volumes:
+      - htcondor_input:/opt/htcondor
+      - apel_output:/var/log/accounting
+    restart: always
+  apel-ssm:
+    build:
+      context: .
+      dockerfile: Dockerfile-ssm
+    image: hepdocker/apel-ssm
+    links:
+      - db
+    volumes_from:
+      - apel-htcondor
+    depends_on:
+      - db
+      - apel-htcondor
+    restart: always
+  db:
+    image: mysql:5.5
+    volumes:
+      - mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_USER: dev
+      MYSQL_PASSWORD: 123456
+      MYSQL_DATABASE: myapp
+    restart: always
+
+volumes:
+  mysql:
+  htcondor_input: 
+  apel_output:
+  

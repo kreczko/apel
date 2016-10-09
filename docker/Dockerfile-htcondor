@@ -1,0 +1,4 @@
+FROM hepdocker/apel-base
+
+COPY parser.cfg /etc/apel/parser.cfg
+

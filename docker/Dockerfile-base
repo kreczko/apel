@@ -1,0 +1,35 @@
+FROM centos:6
+
+RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
+RUN yum update -y && yum install -y wget bzip2 ca-certificates \
+    libglib2.0-0 libxext6 libsm6 libxrender1 \
+    git mercurial subversion
+
+RUN echo 'export PATH=/opt/conda/bin:$PATH' > /etc/profile.d/conda.sh && \
+    wget --quiet https://repo.continuum.io/miniconda/Miniconda2-4.1.11-Linux-x86_64.sh -O ~/miniconda.sh && \
+    /bin/bash ~/miniconda.sh -b -p /opt/conda && \
+    rm ~/miniconda.sh
+
+ENV PATH /opt/conda/bin:$PATH
+
+RUN /opt/conda/bin/conda update conda -y && \
+	/opt/conda/bin/pip install -U pip && \
+	/opt/conda/bin/conda install MySQL-python -y && \
+	/opt/conda/bin/conda clean -t
+
+# apel requires LDAP, gcc, only needed when installing from source
+RUN yum install -y gcc python-devel cyrus-sasl-devel \
+	openldap-devel openssl-devel python-daemon python-dirq stomppy
+
+# install from source
+#COPY apel /opt/apel
+#RUN /opt/conda/bin/pip install /opt/apel
+# or install with yum
+RUN yum install -y https://github.com/apel/apel/releases/download/1.5.1-1/apel-client-1.5.1-1.el6.noarch.rpm \
+		https://github.com/apel/apel/releases/download/1.5.1-1/apel-lib-1.5.1-1.el6.noarch.rpm \
+		https://github.com/apel/apel/releases/download/1.5.1-1/apel-parsers-1.5.1-1.el6.noarch.rpm \
+		https://github.com/apel/ssm/releases/download/2.1.7-1/apel-ssm-2.1.7-1.el6.noarch.rpm
+RUN yum clean all
+		
+
+CMD ["/bin/bash"]
